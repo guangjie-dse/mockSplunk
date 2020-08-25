@@ -15,7 +15,9 @@ const sse = new SSE("Smith says hello.");
 const options = {
   key: fs.readFileSync(process.env.KEY_FILE),
   cert: fs.readFileSync(process.env.CERT_FILE),
-  ca: fs.readFileSync(process.env.CERT_CHAIN)
+  ca: process.env.CERT_CHAIN.split(',').map((ca_cert_file) => {
+    return fs.readFileSync(ca_cert_file);
+  }),
 };
 
 app.use(express.static("public"));
