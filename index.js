@@ -12,14 +12,6 @@ dotenv.config();
 const app = express();
 const sse = new SSE("Smith says hello.");
 
-const options = {
-  key: fs.readFileSync(process.env.KEY_FILE),
-  cert: fs.readFileSync(process.env.CERT_FILE),
-  ca: process.env.CERT_CHAIN.split(',').map((ca_cert_file) => {
-    return fs.readFileSync(ca_cert_file);
-  }),
-};
-
 app.use(express.static("public"));
 app.use(bodyParser.raw({ inflate: true, limit: "10mb", type: "*/*" }));
 
@@ -38,8 +30,19 @@ http
   .listen(process.env.HTTP_PORT, () =>
     console.log(`HTTP Server running on port ${process.env.HTTP_PORT}`)
   );
-https
-  .createServer(options, app)
-  .listen(process.env.HTTPS_PORT, () =>
-    console.log(`HTTPS Server running on port ${process.env.HTTPS_PORT}`)
-  );
+
+if (process.env.HTTPS_PORT){
+  const options = {
+    key: fs.readFileSync(process.env.KEY_FILE),
+    cert: fs.readFileSync(process.env.CERT_FILE),
+    ca: process.env.CERT_CHAIN.split(',').map((ca_cert_file) => {
+      return fs.readFileSync(ca_cert_file);
+    }),
+  };
+  https
+    .createServer(options, app)
+    .listen(process.env.HTTPS_PORT, () =>
+      console.log(`HTTPS Server running on port ${process.env.HTTPS_PORT}`)
+    );
+}
+
